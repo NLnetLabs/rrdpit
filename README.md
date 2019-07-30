@@ -7,21 +7,32 @@ flavour to deliver these files to the world.
 
 ## Installing rrdpit
 
-Assuming you have rsync and the C toolchain but not yet [Rust 1.34](#rust) 
-or newer, here’s how you get rrdpit installed.
+Assuming you have rsync and the C toolchain but not yet Rust, here’s how
+you get rust installed.
 
 ```bash
 curl https://sh.rustup.rs -sSf | sh
 source ~/.cargo/env
-cargo install rrdpit
+```
+
+If you have an old version of rust installed you may have to update it.
+```bash
+rustup update
+```
+
+To install 'rrdpit' under your user's home directory, use this:
+
+```bash
+git clone git@github.com:NLnetLabs/rrdpit.git
+cd rrdpit
+cargo install
 ```
 
 If you have an older version of rrdpit installed, you can update via
 
 ```bash
-cargo install -f rrdpit
+cargo install -f
 ```
-
 
 ## Using rrdpit
 
@@ -150,11 +161,43 @@ target/8e142e20-236c-4694-8430-b05693fab150/2/delta.xml
 target/notification.xml
 ```
 
+rrdpit will also perform some sanity checks on the existing RRDP files, and if it finds an issue it will use a new session:
+
+```bash
+$ find target -type f
+target/8e142e20-236c-4694-8430-b05693fab150/1/snapshot.xml
+target/8e142e20-236c-4694-8430-b05693fab150/2/snapshot.xml
+target/8e142e20-236c-4694-8430-b05693fab150/2/delta.xml
+target/notification.xml
+
+$ echo "corrupt" > target//8e142e20-236c-4694-8430-b05693fab150/2/delta.xml
+
+
+$ rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/
+$ find target -type f
+target/07cfc1ce-e7d9-4bec-8a70-9feb76778700/1/snapshot.xml
+target/8e142e20-236c-4694-8430-b05693fab150/1/snapshot.xml
+target/8e142e20-236c-4694-8430-b05693fab150/2/snapshot.xml
+target/8e142e20-236c-4694-8430-b05693fab150/2/delta.xml
+target/notification.xml
+```
+
+Optionally you can let rrdpit clean up old files as well:
+```bash
+$ rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/ clean
+
+$ find target -type f
+target/07cfc1ce-e7d9-4bec-8a70-9feb76778700/1/snapshot.xml
+target/notification.xml
+```
+
+
+
 ## Future
 
 This code can possibly use more testing. And some things can be cleaned up. However, it seems to
 work well from the testing we have done.
 
-Of course you can create issues, but given that my main effort is directed at Krill for the 
-moment, which includes its own RRDP server, I cannot guarantee that issues will get a high 
+Of course you can create issues, but given that our main effort is directed at Krill for the 
+moment, which includes its own RRDP server, we cannot guarantee that issues will get a high 
 priority. Pull requests may get more mileage ;)
