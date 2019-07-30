@@ -1,0 +1,20 @@
+[package]
+name = "rrdpit"
+version = "0.0.1"
+authors = ["The NLnet Labs RPKI Team <rpki@nlnetlabs.nl>"]
+description = "RRDP IT: A disk to RPKI Delta Protocol tool."
+repository = "https://github.com/NLnetLabs/rrdpit"
+keywords = ["rpki", "routing-security", "bgp"]
+categories = ["command-line-utilities"]
+license = "BSD-3-Clause"
+readme = "README.md"
+
+[dependencies]
+base64       = "^0.10"
+bytes        = "^0.4"
+clap         = "2.33.0"
+derive_more  = "^0.13"
+hex          = "^0.3"
+ring         = "^0.16"
+uuid         = { version = "^0.7", features = ["v4"] }
+xml-rs       = "0.8.0"
