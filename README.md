@@ -64,7 +64,9 @@ Note that 'clean' is optional. If used rrdpit will try to clean out the target
 dir, i.e. it will remove unused session id dirs, and unused version directories
 for delta files which are no longer referenced.
 
-Use this option with extreme prejudice, and never as root.. please.
+Use this option with care. You do NOT want to use this and accidentally use a
+system directory for the `--target` option. Especially if you run this as root,
+which would be ill-advised as well.
 
 ### Examples
 
@@ -93,7 +95,10 @@ total size is 14.25M  speedup is 1.27
 Now create RRDP files in a target dir:
 ```bash
 $ mkdir target
-$ time rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/
+$ time rrdpit --https https://rpki.arin.net/rrdp/ \
+              --rsync rsync://rpki.arin.net/repository/ \
+              --source ./source/ \
+              --target ./target/
 
 real  0m0.848s
 user  0m0.385s
@@ -105,7 +110,7 @@ Check that all expected files are there, or well, at least the number:
 $ find ./source/ -type f | wc -l
     7031
 
-$ grep uri ./target/8e142e20-236c-4694-8430-b05693fab150/1/snapshot.xml  | wc -l
+$ grep uri ./target/8e142e20-236c-4694-8430-b05693fab150/1/snapshot.xml | wc -l
     7031
 ```
 
@@ -113,7 +118,10 @@ $ grep uri ./target/8e142e20-236c-4694-8430-b05693fab150/1/snapshot.xml  | wc -l
 
 ```bash
 $ rm source/arin-rpki-ta.cer 
-$ time rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/
+$ time rrdpit --https https://rpki.arin.net/rrdp/ \
+              --rsync rsync://rpki.arin.net/repository/ \
+              --source ./source/ \
+              --target ./target/
 
 real  0m1.484s
 user  0m1.285s
@@ -144,7 +152,10 @@ $ cat ./target/8e142e20-236c-4694-8430-b05693fab150/2/delta.xml
 Note that if you sync again, and there are no changes in the source dir, no deltas will be written:
 
 ```bash
-$ time rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/
+$ time rrdpit --https https://rpki.arin.net/rrdp/ \
+              --rsync rsync://rpki.arin.net/repository/ \
+              --source ./source/ \
+              --target ./target/
 
 real  0m1.495s
 user  0m1.292s
@@ -173,7 +184,11 @@ target/notification.xml
 $ echo "corrupt" > target//8e142e20-236c-4694-8430-b05693fab150/2/delta.xml
 
 
-$ rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/
+$ rrdpit --https https://rpki.arin.net/rrdp/ \
+         --rsync rsync://rpki.arin.net/repository/ \
+         --source ./source/ \
+         --target ./target/
+         
 $ find target -type f
 target/07cfc1ce-e7d9-4bec-8a70-9feb76778700/1/snapshot.xml
 target/8e142e20-236c-4694-8430-b05693fab150/1/snapshot.xml
@@ -184,7 +199,11 @@ target/notification.xml
 
 Optionally you can let rrdpit clean up old files as well:
 ```bash
-$ rrdpit --https https://rpki.arin.net/rrdp/ --rsync rsync://rpki.arin.net/repository/ --source ./source/ --target ./target/ clean
+$ rrdpit --https https://rpki.arin.net/rrdp/ \
+         --rsync rsync://rpki.arin.net/repository/ \
+         --source ./source/ \
+         --target ./target/ \
+         clean
 
 $ find target -type f
 target/07cfc1ce-e7d9-4bec-8a70-9feb76778700/1/snapshot.xml
