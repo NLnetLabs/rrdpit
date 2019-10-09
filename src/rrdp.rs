@@ -503,7 +503,7 @@ impl Snapshot {
                     if new_file != old_file {
                         updates.push(UpdateElement {
                             uri: uri.clone(),
-                            hash: new_file.hash().clone(),
+                            hash: old_file.hash().clone(),
                             base64: new_file.base64().clone(),
                         })
                     }
