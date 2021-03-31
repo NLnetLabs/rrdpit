@@ -52,7 +52,7 @@ You can ask rrdpit for help.
 
 ```bash
 rrdpit --help
-rrdpit 0.0.1
+rrdpit 0.0.2
 Dist to RPKI RRDP
 
 USAGE:
