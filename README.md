@@ -5,6 +5,18 @@ system, and produce RPKI RRDP (RFC 8182) notification, snapshot, and
 delta files. You will need to use an http server of your preferred
 flavour to deliver these files to the world.
 
+## Changelog
+
+### Release 0.0.2
+
+Ignore hidden files in the source directory. I.e. exclude any and all files
+and folders starting with a '.' character.
+
+### Release 0.0.1
+
+Initial release.
+
+
 ## Installing rrdpit
 
 Assuming you have rsync and the C toolchain but not yet Rust, here’s how

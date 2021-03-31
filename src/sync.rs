@@ -1,8 +1,8 @@
-use std::{fmt, fs, io};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::str::from_utf8_unchecked;
+use std::{fmt, fs, io};
 
 use bytes::Bytes;
 use ring::digest;
@@ -196,7 +196,14 @@ fn recurse_disk(
     for entry in fs::read_dir(path).map_err(|_| Error::cannot_read(path))? {
         let entry = entry.map_err(|_| Error::cannot_read(path))?;
         let path = entry.path();
-        if path.is_dir() {
+        if entry
+            .file_name()
+            .to_str()
+            .map(|name| name.starts_with('.'))
+            .unwrap_or(true)
+        {
+            // this is a hidden file / directory (by convention) so skip it
+        } else if path.is_dir() {
             let mut other = recurse_disk(base_path, &path, rsync_base)?;
             res.append(&mut other);
         } else {
@@ -325,5 +332,4 @@ mod tests {
 
         assert_eq!(expected, found);
     }
-
 }
