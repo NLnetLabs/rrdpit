@@ -1,13 +1,13 @@
-use std::path::PathBuf;
 use clap::{App, Arg};
-use sync::{RsyncUri, HttpsUri};
+use std::path::PathBuf;
+use sync::{HttpsUri, RsyncUri};
 
 pub struct Options {
     pub source: PathBuf,
     pub target: PathBuf,
     pub rsync: RsyncUri,
     pub https: HttpsUri,
-    pub clean: bool
+    pub clean: bool,
 }
 
 impl Options {
@@ -16,13 +16,15 @@ impl Options {
         target: &str,
         rsync: &str,
         https: &str,
-        clean: bool
+        clean: bool,
     ) -> Result<Self, Error> {
         let source = PathBuf::from(source);
         let target = PathBuf::from(target);
 
-        let rsync = RsyncUri::base_uri(rsync).map_err(|_| Error::RsyncBaseUri(rsync.to_string()))?;
-        let https = HttpsUri::base_uri(https).map_err(|_| Error::HttpsBaseUri(https.to_string()))?;
+        let rsync =
+            RsyncUri::base_uri(rsync).map_err(|_| Error::RsyncBaseUri(rsync.to_string()))?;
+        let https =
+            HttpsUri::base_uri(https).map_err(|_| Error::HttpsBaseUri(https.to_string()))?;
 
         if !source.is_dir() {
             Err(Error::cannot_read(source))
@@ -34,14 +36,14 @@ impl Options {
                 target,
                 rsync,
                 https,
-                clean
+                clean,
             })
         }
     }
 
     pub fn from_args() -> Result<Options, Error> {
         let matches = App::new("rrdpit")
-            .version("0.0.1")
+            .version("0.0.2")
             .about("Dist to RPKI RRDP")
             .arg(
                 Arg::with_name("source")
@@ -78,7 +80,7 @@ impl Options {
             .arg(
                 Arg::with_name("clean")
                     .help("Clean up target dir (handle with care!)")
-                    .required(false)
+                    .required(false),
             )
             .get_matches();
 
@@ -127,9 +129,8 @@ pub mod tests {
             "./test-work",
             "rsync://localhost/repo/",
             "https://localhost/repo/",
-            false
+            false,
         )
         .unwrap();
     }
-
 }
