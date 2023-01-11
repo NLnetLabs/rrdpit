@@ -5,6 +5,28 @@ system, and produce RPKI RRDP (RFC 8182) notification, snapshot, and
 delta files. You will need to use an http server of your preferred
 flavour to deliver these files to the world.
 
+=====================================================================
+                              WARNING:
+=====================================================================
+
+This tool is designed to be run *in between* publication runs, but not
+during. As part of the syncing process the source directory is crawled
+recursively. If there are any changes made to the paths during the sync
+then this can result in RRDP snapshots and delta containing inconsistent
+repository state.
+
+This situation would resolve itself when rrdpit runs again while there
+are no changes being made, but it could cause errors and noise for RPKI
+validators.
+
+So, the best option is to run this when it is known that there will be
+no changes made to the source. E.g. when a non RRDP capable publication
+server knows that it's done writing content, it could trigger rrdpit,
+and wait with writing new content until rrdpit is done.
+
+Of course, the safest option might still be to use an RRDP capable RPKI
+Publication Server instead so this extra helper tool would not be needed.
+
 ## Changelog
 
 ### Release 0.0.2
