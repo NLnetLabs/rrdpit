@@ -5,9 +5,8 @@ system, and produce RPKI RRDP (RFC 8182) notification, snapshot, and
 delta files. You will need to use an http server of your preferred
 flavour to deliver these files to the world.
 
-=====================================================================
-                              WARNING:
-=====================================================================
+WARNING:
+========
 
 This tool is designed to be run *in between* publication runs, but not
 during. As part of the syncing process the source directory is crawled
