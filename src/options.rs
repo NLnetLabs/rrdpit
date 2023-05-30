@@ -94,7 +94,7 @@ impl Options {
                     .short("m")
                     .long("max_deltas")
                     .value_name("number")
-                    .help("Limit the maximum number of deltas kept. Default: 25")
+                    .help("Limit the maximum number of deltas kept. Default: 25. Minimum: 1")
                     .required(false),
             )
             .get_matches();
@@ -126,6 +126,9 @@ pub enum Error {
 
     #[display(fmt = "Cannot parse number: {}", _0)]
     CannotParseNumber(String),
+
+    #[display(fmt = "max_deltas must be at least 1")]
+    MaxDeltasMustBeOneOrHigher,
 }
 
 impl Error {
