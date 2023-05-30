@@ -209,7 +209,7 @@ impl RepoState {
     ///
     /// If clean is true, this will also delete old sessions and delta/snapshot dirs for
     /// old versions which are no longer referenced in the notification file.
-    pub fn save(mut self, clean: bool) -> Result<(), io::Error> {
+    pub fn save(mut self, max_deltas: usize, clean: bool) -> Result<(), io::Error> {
         let serial = self.serial;
         let session = self.session;
 
@@ -230,7 +230,7 @@ impl RepoState {
             self.deltas.push_front(delta_ref);
         }
 
-        // Purge old deltas
+        // First purge deltas in excess of snapshot size
         let snapshot_size = snapshot_ref.size();
         let mut deltas_size = 0;
         self.deltas.retain(|d| {
@@ -238,6 +238,9 @@ impl RepoState {
             deltas_size += d.size();
             add
         });
+
+        // Truncate any deltas that exceed the max_deltas number
+        self.deltas.truncate(max_deltas);
 
         let last_serial = self.deltas.back().map(|d| d.serial);
 
@@ -867,7 +870,7 @@ mod tests {
         );
         let target_dir_1 = PathBuf::from(format!("./test-work/{}/1", state.session));
 
-        state.clone().save(true).unwrap();
+        state.clone().save(25, true).unwrap();
 
         let mut loaded_state = RepoState::reconstitute(
             HttpsUri::from("https://localhost/rrdp/"),
@@ -878,9 +881,10 @@ mod tests {
         assert_eq!(state, loaded_state);
 
         let snapshot_2 = snapshot_from_src(loaded_state.session, loaded_state.serial + 1, SOURCE_2);
+        let target_dir_2 = PathBuf::from(format!("./test-work/{}/2", state.session));
 
         loaded_state.apply(snapshot_2).unwrap();
-        loaded_state.save(true).unwrap();
+        loaded_state.save(25, true).unwrap();
 
         let mut state = RepoState::reconstitute(
             HttpsUri::from("https://localhost/rrdp/"),
@@ -891,12 +895,14 @@ mod tests {
 
         let snapshot_3 = snapshot_from_src(state.session, state.serial + 1, SOURCE_3);
         state.apply(snapshot_3).unwrap();
-        state.save(true).unwrap();
+        state.save(25, true).unwrap();
 
         assert!(!target_dir_1.exists()); // dir 1 should be cleaned up (too much space)
         assert!(target_dir_3.exists());
 
-        // Applying a zero delta should be a no-op, so target dir should not exist
+        // Applying a zero delta should be a no-op, so the new target dir should not exist
+        // Furthermore, delta 2 should be removed if we limit the max_deltas to 1. I.e.
+        // we will only have target dir 3 remaining.
         let mut state = RepoState::reconstitute(
             HttpsUri::from("https://localhost/rrdp/"),
             PathBuf::from("./test-work/"),
@@ -907,8 +913,10 @@ mod tests {
 
         let snapshot_4 = snapshot_from_src(state.session, state.serial + 1, SOURCE_3);
         state.apply(snapshot_4).unwrap();
-        state.save(true).unwrap();
+        state.save(1, true).unwrap();
 
+        assert!(!target_dir_2.exists());
+        assert!(target_dir_3.exists());
         assert!(!target_dir_4.exists());
     }
 }

@@ -8,6 +8,7 @@ pub struct Options {
     pub rsync: RsyncUri,
     pub https: HttpsUri,
     pub clean: bool,
+    pub max_deltas: usize,
 }
 
 impl Options {
@@ -17,6 +18,7 @@ impl Options {
         rsync: &str,
         https: &str,
         clean: bool,
+        max_deltas: &str,
     ) -> Result<Self, Error> {
         let source = PathBuf::from(source);
         let target = PathBuf::from(target);
@@ -25,6 +27,10 @@ impl Options {
             RsyncUri::base_uri(rsync).map_err(|_| Error::RsyncBaseUri(rsync.to_string()))?;
         let https =
             HttpsUri::base_uri(https).map_err(|_| Error::HttpsBaseUri(https.to_string()))?;
+
+        let max_deltas = max_deltas
+            .parse::<usize>()
+            .map_err(|_| Error::CannotParseNumber(max_deltas.to_string()))?;
 
         if !source.is_dir() {
             Err(Error::cannot_read(source))
@@ -37,13 +43,14 @@ impl Options {
                 rsync,
                 https,
                 clean,
+                max_deltas,
             })
         }
     }
 
     pub fn from_args() -> Result<Options, Error> {
         let matches = App::new("rrdpit")
-            .version("0.0.2")
+            .version("0.0.3")
             .about("Dist to RPKI RRDP")
             .arg(
                 Arg::with_name("source")
@@ -82,16 +89,25 @@ impl Options {
                     .help("Clean up target dir (handle with care!)")
                     .required(false),
             )
+            .arg(
+                Arg::with_name("max_deltas")
+                    .short("m")
+                    .long("max_deltas")
+                    .value_name("number")
+                    .help("Limit the maximum number of deltas kept. Default: 25")
+                    .required(false),
+            )
             .get_matches();
 
         let source = matches.value_of("source").unwrap();
         let target = matches.value_of("target").unwrap();
         let rsync = matches.value_of("rsync").unwrap();
         let https = matches.value_of("https").unwrap();
+        let max_deltas = matches.value_of("max_deltas").unwrap_or("25");
 
         let clean = matches.is_present("clean");
 
-        Self::from_strs(source, target, rsync, https, clean)
+        Self::from_strs(source, target, rsync, https, clean, max_deltas)
     }
 }
 
@@ -107,6 +123,9 @@ pub enum Error {
 
     #[display(fmt = "Not a directory: {}", _0)]
     HttpsBaseUri(String),
+
+    #[display(fmt = "Cannot parse number: {}", _0)]
+    CannotParseNumber(String),
 }
 
 impl Error {
@@ -130,6 +149,7 @@ pub mod tests {
             "rsync://localhost/repo/",
             "https://localhost/repo/",
             false,
+            "25",
         )
         .unwrap();
     }
