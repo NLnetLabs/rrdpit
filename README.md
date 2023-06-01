@@ -1,6 +1,6 @@
 # RRDPIT
 
-"rrpdit" is a small little tool that can be pointed at a directory on your
+"rrdpit" is a small little tool that can be pointed at a directory on your
 system, and produce RPKI RRDP (RFC 8182) notification, snapshot, and
 delta files. You will need to use an http server of your preferred
 flavour to deliver these files to the world.
