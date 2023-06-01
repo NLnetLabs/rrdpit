@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::str::from_utf8_unchecked;
 use std::{fmt, fs, io};
 
@@ -163,7 +163,7 @@ pub fn read(path: &PathBuf) -> Result<Bytes, io::Error> {
     Ok(Bytes::from(bytes))
 }
 
-fn create_file_with_path(path: &PathBuf) -> Result<File, io::Error> {
+fn create_file_with_path(path: &Path) -> Result<File, io::Error> {
     if !path.exists() {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
@@ -173,14 +173,14 @@ fn create_file_with_path(path: &PathBuf) -> Result<File, io::Error> {
 }
 
 /// Derive the path for this file.
-pub fn file_path(base_path: &PathBuf, file_name: &str) -> PathBuf {
-    let mut path = base_path.clone();
+pub fn file_path(base_path: &Path, file_name: &str) -> PathBuf {
+    let mut path = base_path.to_path_buf();
     path.push(file_name);
     path
 }
 
 /// Saves a file, creating parent dirs as needed
-pub fn save(content: &[u8], full_path: &PathBuf) -> Result<(), io::Error> {
+pub fn save(content: &[u8], full_path: &Path) -> Result<(), io::Error> {
     let mut f = create_file_with_path(full_path)?;
     f.write_all(content)?;
     Ok(())
@@ -218,16 +218,12 @@ fn recurse_disk(
     Ok(res)
 }
 
-fn derive_uri(
-    base_path: &PathBuf,
-    path: &PathBuf,
-    rsync_base: &RsyncUri,
-) -> Result<RsyncUri, Error> {
+fn derive_uri(base_path: &Path, path: &Path, rsync_base: &RsyncUri) -> Result<RsyncUri, Error> {
     let rel_path = derive_relative_path(base_path, path)?;
     Ok(rsync_base.resolve(&rel_path))
 }
 
-fn derive_relative_path(base_path: &PathBuf, path: &PathBuf) -> Result<String, Error> {
+fn derive_relative_path(base_path: &Path, path: &Path) -> Result<String, Error> {
     let base_str = base_path.to_string_lossy().to_string();
     let mut path_str = path.to_string_lossy().to_string();
 
@@ -285,7 +281,7 @@ pub enum Error {
 }
 
 impl Error {
-    fn cannot_read(path: &PathBuf) -> Error {
+    fn cannot_read(path: &Path) -> Error {
         let str = path.to_string_lossy().to_string();
         Error::CannotRead(str)
     }

@@ -5,7 +5,43 @@ system, and produce RPKI RRDP (RFC 8182) notification, snapshot, and
 delta files. You will need to use an http server of your preferred
 flavour to deliver these files to the world.
 
+WARNING:
+========
+
+This tool is designed to be run *in between* publication runs, but not
+during. As part of the syncing process the source directory is crawled
+recursively. If there are any changes made to the paths during the sync
+then this can result in RRDP snapshots and delta containing inconsistent
+repository state.
+
+This situation would resolve itself when rrdpit runs again while there
+are no changes being made, but it could cause errors and noise for RPKI
+validators.
+
+So, the best option is to run this when it is known that there will be
+no changes made to the source. E.g. when a non RRDP capable publication
+server knows that it's done writing content, it could trigger rrdpit,
+and wait with writing new content until rrdpit is done.
+
+Of course, the safest option might still be to use an RRDP capable RPKI
+Publication Server instead so this extra helper tool would not be needed.
+
 ## Changelog
+
+### Release 0.0.3
+
+Add option to limit the maximum number of deltas using --max_deltas.
+Keeping too many deltas will result in large RRDP notification files if
+the individual deltas are much smaller than the snapshot. This can have
+a big impact on the server if many RPs request a large notification file.
+
+The default limit is set to 25. This value will work well if rrdpit runs
+every minute as it's more than twice the number of the typical RP fetch
+interval (10 minutes). If rrdpit runs less frequently then this number
+can be lowered. Essentially, one should keep enough deltas so that returning
+RPs never need to load the snapshot.
+
+The minimum value of this setting is 1.
 
 ### Release 0.0.2
 

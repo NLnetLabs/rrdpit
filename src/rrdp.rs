@@ -1,17 +1,17 @@
 //! Data objects used in the (RRDP) repository. I.e. the publish, update, and
 //! withdraw elements, as well as the notification, snapshot and delta file
 //! definitions.
-use std::{fmt, io};
 use std::collections::{HashMap, VecDeque};
 use std::num::ParseIntError;
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::{fmt, io};
 
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::sync::{self, Base64, CurrentFile, EncodedHash, HttpsUri, RsyncUri};
-use crate::xml::{AttributesError, XmlReaderErr, XmlReader, XmlWriter};
+use crate::xml::{AttributesError, XmlReader, XmlReaderErr, XmlWriter};
 
 const VERSION: &str = "1";
 const NS: &str = "http://www.ripe.net/rpki/rrdp";
@@ -177,8 +177,12 @@ pub struct RepoState {
 /// # Data Access
 ///
 impl RepoState {
-    pub fn session(&self) -> Uuid { self.session }
-    pub fn serial(&self) -> u64 { self.serial }
+    pub fn session(&self) -> Uuid {
+        self.session
+    }
+    pub fn serial(&self) -> u64 {
+        self.serial
+    }
 }
 
 impl RepoState {
@@ -205,7 +209,7 @@ impl RepoState {
     ///
     /// If clean is true, this will also delete old sessions and delta/snapshot dirs for
     /// old versions which are no longer referenced in the notification file.
-    pub fn save(mut self, clean: bool) -> Result<(), io::Error> {
+    pub fn save(mut self, max_deltas: usize, clean: bool) -> Result<(), io::Error> {
         let serial = self.serial;
         let session = self.session;
 
@@ -226,7 +230,7 @@ impl RepoState {
             self.deltas.push_front(delta_ref);
         }
 
-        // Purge old deltas
+        // First purge deltas in excess of snapshot size
         let snapshot_size = snapshot_ref.size();
         let mut deltas_size = 0;
         self.deltas.retain(|d| {
@@ -235,7 +239,8 @@ impl RepoState {
             add
         });
 
-
+        // Truncate any deltas that exceed the max_deltas number
+        self.deltas.truncate(max_deltas);
 
         let last_serial = self.deltas.back().map(|d| d.serial);
 
@@ -317,10 +322,8 @@ impl RepoState {
                     let hash = a.take_req("hash")?;
                     a.exhausted()?;
 
-                    let snapshot_rel = base_uri
-                        .relative_to(uri)
-                        .ok_or_else(|| Error::InvalidRepoState)?;
-                    let snapshot_path = base_dir.join(&PathBuf::from(snapshot_rel));
+                    let snapshot_rel = base_uri.relative_to(uri).ok_or(Error::InvalidRepoState)?;
+                    let snapshot_path = base_dir.join(snapshot_rel);
                     let snapshot =
                         sync::read(&snapshot_path).map_err(|_| Error::InvalidRepoState)?;
 
@@ -337,31 +340,33 @@ impl RepoState {
 
                 let mut deltas = VecDeque::new();
 
-                while let Some(delta) = r.take_opt_element(|t, mut a, _r| match t.name.as_ref() {
-                    "delta" => {
-                        let serial = a.take_req("serial")?;
-                        let serial = u64::from_str(&serial)?;
+                while let Some(delta) =
+                    r.take_opt_element(|t, mut a, _r| match t.name.as_ref() {
+                        "delta" => {
+                            let serial = a.take_req("serial")?;
+                            let serial = u64::from_str(&serial)?;
 
-                        let uri = a.take_req("uri")?;
-                        let hash = a.take_req("hash")?;
-                        a.exhausted()?;
+                            let uri = a.take_req("uri")?;
+                            let hash = a.take_req("hash")?;
+                            a.exhausted()?;
 
-                        let rel = base_uri.relative_to(uri).ok_or_else(|| Error::InvalidRepoState)?;
+                            let rel = base_uri.relative_to(uri).ok_or(Error::InvalidRepoState)?;
 
-                        let uri = base_uri.resolve(&rel);
-                        let path = base_dir.join(&PathBuf::from(rel));
+                            let uri = base_uri.resolve(&rel);
+                            let path = base_dir.join(rel);
 
-                        let file = sync::read(&path).map_err(|_| Error::InvalidRepoState)?;
-                        let file_ref = FileRef::new(uri, &file);
+                            let file = sync::read(&path).map_err(|_| Error::InvalidRepoState)?;
+                            let file_ref = FileRef::new(uri, &file);
 
-                        if file_ref.hash().to_string() != hash {
-                            return Err(Error::InvalidRepoState)
+                            if file_ref.hash().to_string() != hash {
+                                return Err(Error::InvalidRepoState);
+                            }
+
+                            Ok(Some(DeltaRef::new(serial, file_ref)))
                         }
-
-                        Ok(Some(DeltaRef::new(serial, file_ref)))
-                    }
-                    _ => Err(Error::InvalidXml(format!("Unexpected tag: {}", t.name))),
-                })? {
+                        _ => Err(Error::InvalidXml(format!("Unexpected tag: {}", t.name))),
+                    })?
+                {
                     deltas.push_back(delta)
                 }
 
@@ -394,7 +399,7 @@ impl RepoState {
 
         let delta = self.snapshot.to(&new_snapshot)?;
 
-        if ! delta.is_empty() {
+        if !delta.is_empty() {
             self.snapshot = new_snapshot;
             self.new_delta = Some(delta);
             self.serial += 1;
@@ -828,8 +833,7 @@ mod tests {
     #[test]
     fn diff_snapshot() {
         let snapshot_1 = snapshot_source_1();
-        let snapshot_2 =
-            snapshot_from_src(snapshot_1.session, snapshot_1.serial + 1, SOURCE_2);
+        let snapshot_2 = snapshot_from_src(snapshot_1.session, snapshot_1.serial + 1, SOURCE_2);
 
         let delta = snapshot_1.to(&snapshot_2).unwrap();
 
@@ -866,7 +870,7 @@ mod tests {
         );
         let target_dir_1 = PathBuf::from(format!("./test-work/{}/1", state.session));
 
-        state.clone().save(true).unwrap();
+        state.clone().save(25, true).unwrap();
 
         let mut loaded_state = RepoState::reconstitute(
             HttpsUri::from("https://localhost/rrdp/"),
@@ -876,14 +880,11 @@ mod tests {
 
         assert_eq!(state, loaded_state);
 
-        let snapshot_2 = snapshot_from_src(
-            loaded_state.session,
-            loaded_state.serial + 1,
-            SOURCE_2,
-        );
+        let snapshot_2 = snapshot_from_src(loaded_state.session, loaded_state.serial + 1, SOURCE_2);
+        let target_dir_2 = PathBuf::from(format!("./test-work/{}/2", state.session));
 
         loaded_state.apply(snapshot_2).unwrap();
-        loaded_state.save(true).unwrap();
+        loaded_state.save(25, true).unwrap();
 
         let mut state = RepoState::reconstitute(
             HttpsUri::from("https://localhost/rrdp/"),
@@ -894,24 +895,28 @@ mod tests {
 
         let snapshot_3 = snapshot_from_src(state.session, state.serial + 1, SOURCE_3);
         state.apply(snapshot_3).unwrap();
-        state.save(true).unwrap();
+        state.save(25, true).unwrap();
 
         assert!(!target_dir_1.exists()); // dir 1 should be cleaned up (too much space)
         assert!(target_dir_3.exists());
 
-        // Applying a zero delta should be a no-op, so target dir should not exist
+        // Applying a zero delta should be a no-op, so the new target dir should not exist
+        // Furthermore, delta 2 should be removed if we limit the max_deltas to 1. I.e.
+        // we will only have target dir 3 remaining.
         let mut state = RepoState::reconstitute(
             HttpsUri::from("https://localhost/rrdp/"),
             PathBuf::from("./test-work/"),
-        ).unwrap();
+        )
+        .unwrap();
 
         let target_dir_4 = PathBuf::from(format!("./test-work/{}/4", state.session));
 
         let snapshot_4 = snapshot_from_src(state.session, state.serial + 1, SOURCE_3);
         state.apply(snapshot_4).unwrap();
-        state.save(true).unwrap();
+        state.save(1, true).unwrap();
 
+        assert!(!target_dir_2.exists());
+        assert!(target_dir_3.exists());
         assert!(!target_dir_4.exists());
     }
-
 }
