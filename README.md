@@ -28,6 +28,10 @@ Publication Server instead so this extra helper tool would not be needed.
 
 ## Changelog
 
+### Release 0.0.4
+
+Updated _ring_ to 0.17.
+
 ### Release 0.0.3
 
 Add option to limit the maximum number of deltas using --max_deltas.
