@@ -22,7 +22,7 @@ jobs:
       DOCKER_HUB_ID: ${{ vars.DOCKER_HUB_ID }}
       DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
     with:
-      cross_build_args: --features static-tls
+      cross_build_args: 
       cross_max_wait_mins: 20
 
       docker_org: nlnetlabs
