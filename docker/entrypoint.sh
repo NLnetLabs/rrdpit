@@ -8,7 +8,6 @@ RSYNC_URI="${RSYNC_URI:-rsync://example.org/test/}"
 HTTPS_URI="${HTTPS_URI:-https://example.org/}"
 
 exec /usr/local/bin/rrdpit \
-    -v \
     --source ${SOURCE_DIR} \
     --target ${TARGET_DIR} \
     --rsync ${RSYNC_URI} \
