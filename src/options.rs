@@ -148,7 +148,7 @@ pub mod tests {
             "rsync://localhost/repo/",
             "https://localhost/repo/",
             false,
-            &25usize,
+            &"25",
         )
         .unwrap();
     }
