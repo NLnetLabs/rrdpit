@@ -4,10 +4,12 @@ on:
     branches:
       - main
       - master
+      - github-workflows
   pull_request:
     branches:
       - main
       - master
+      - github-workflows
 jobs:
   test:
     name: test
