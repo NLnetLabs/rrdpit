@@ -783,8 +783,8 @@ impl From<uuid::parser::ParseError> for Error {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rrdp::Snapshot;
-    use sync;
+    use crate::rrdp::Snapshot;
+    use crate::sync;
 
     const SOURCE_1: &str = "./test-resources/source-1/";
     const SOURCE_2: &str = "./test-resources/source-2/";
