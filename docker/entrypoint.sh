@@ -4,8 +4,8 @@ set -e
 DATA="${DATA:-/data}"
 SOURCE_DIR="${SOURCE_DIR:-$DATA/source}"
 TARGET_DIR="${TARGET_DIR:-$DATA/target}"
-RSYNC_URI="${RSYNC_URI:-$DATA/rsync}"
-HTTPS_URI="${HTTPS_URI:-$DATA/https}"
+RSYNC_URI="${RSYNC_URI:-rsync://example.org/test/}"
+HTTPS_URI="${HTTPS_URI:-https://example.org/}"
 
 exec /usr/local/bin/rrdpit \
     -v \
