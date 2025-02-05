@@ -6,18 +6,19 @@ description = "RRDP IT: A disk to RPKI Delta Protocol tool."
 repository = "https://github.com/NLnetLabs/rrdpit"
 keywords = ["rpki", "routing-security", "bgp"]
 categories = ["command-line-utilities"]
+edition = "2021"
 license = "BSD-3-Clause"
 readme = "README.md"
 
 [dependencies]
 base64       = "^0.10"
 bytes        = "^0.4"
-clap         = "2.33.0"
+clap         = { version = "^4.5.26", features = ["cargo"] }
 derive_more  = "^0.13"
 hex          = "^0.3"
 ring         = "^0.17"
 uuid         = { version = "^0.7", features = ["v4"] }
-xml-rs       = "0.8.0"
+xml-rs       = "0.8.25"
 
 # ------------------------------------------------------------------------------
 # START DEBIAN PACKAGING
@@ -60,3 +61,4 @@ assets = [["target/release/rrdpit", "/usr/bin/rrdpit", "755"]]
 
 # END DEBIAN PACKAGING
 # ------------------------------------------------------------------------------
+

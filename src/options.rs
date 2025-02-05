@@ -1,6 +1,6 @@
-use clap::{App, Arg};
+use clap::{Arg, Command};
 use std::path::PathBuf;
-use sync::{HttpsUri, RsyncUri};
+use crate::sync::{HttpsUri, RsyncUri};
 
 pub struct Options {
     pub source: PathBuf,
@@ -31,7 +31,7 @@ impl Options {
         let max_deltas = max_deltas
             .parse::<usize>()
             .map_err(|_| Error::CannotParseNumber(max_deltas.to_string()))?;
-
+        
         if !source.is_dir() {
             Err(Error::cannot_read(source))
         } else if !target.is_dir() {
@@ -49,49 +49,44 @@ impl Options {
     }
 
     pub fn from_args() -> Result<Options, Error> {
-        let matches = App::new("rrdpit")
-            .version("0.0.3")
+        let matches = Command::new("rrdpit")
+            .version(env!("CARGO_PKG_VERSION"))
             .about("Dist to RPKI RRDP")
             .arg(
-                Arg::with_name("source")
-                    .short("s")
+                Arg::new("source")
                     .long("source")
                     .value_name("dir")
                     .help("source directory")
                     .required(true),
             )
             .arg(
-                Arg::with_name("target")
-                    .short("t")
+                Arg::new("target")
                     .long("target")
                     .value_name("dir")
                     .help("target directory")
                     .required(true),
             )
             .arg(
-                Arg::with_name("rsync")
-                    .short("r")
+                Arg::new("rsync")
                     .long("rsync")
                     .value_name("uri")
                     .help("base rsync uri")
                     .required(true),
             )
             .arg(
-                Arg::with_name("https")
-                    .short("h")
+                Arg::new("https")
                     .long("https")
                     .value_name("uri")
                     .help("base rrdp uri")
                     .required(true),
             )
             .arg(
-                Arg::with_name("clean")
+                Arg::new("clean")
                     .help("Clean up target dir (handle with care!)")
                     .required(false),
             )
             .arg(
-                Arg::with_name("max_deltas")
-                    .short("m")
+                Arg::new("max_deltas")
                     .long("max_deltas")
                     .value_name("number")
                     .help("Limit the maximum number of deltas kept. Default: 25. Minimum: 1")
@@ -99,13 +94,14 @@ impl Options {
             )
             .get_matches();
 
-        let source = matches.value_of("source").unwrap();
-        let target = matches.value_of("target").unwrap();
-        let rsync = matches.value_of("rsync").unwrap();
-        let https = matches.value_of("https").unwrap();
-        let max_deltas = matches.value_of("max_deltas").unwrap_or("25");
+        let source = matches.get_one::<String>("source").unwrap();
+        let target = matches.get_one::<String>("target").unwrap();
+        let rsync = matches.get_one::<String>("rsync").unwrap();
+        let https = matches.get_one::<String>("https").unwrap();
+        let max_deltas_default = "25".to_string();
+        let max_deltas = matches.get_one::<String>("max_deltas").unwrap_or(&max_deltas_default);
 
-        let clean = matches.is_present("clean");
+        let clean = matches.contains_id("clean");
 
         Self::from_strs(source, target, rsync, https, clean, max_deltas)
     }
@@ -152,7 +148,7 @@ pub mod tests {
             "rsync://localhost/repo/",
             "https://localhost/repo/",
             false,
-            "25",
+            &"25",
         )
         .unwrap();
     }
