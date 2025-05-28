@@ -15,7 +15,7 @@ pub struct RsyncUri(String);
 
 impl RsyncUri {
     pub fn base_uri(s: &str) -> Result<Self, Error> {
-        if s.starts_with("rsync://") && s.ends_with('/') {
+        if s.starts_with("rsync://") {
             Ok(RsyncUri(s.to_string()))
         } else {
             Err(Error::InvalidRsyncBase)
