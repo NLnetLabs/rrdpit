@@ -1,5 +1,5 @@
 //! Support for RPKI XML structures.
-use base64;
+use base64::{self, Engine};
 use base64::DecodeError;
 use bytes::Bytes;
 use hex;
@@ -217,15 +217,15 @@ impl<R: io::Read> XmlReader<R> {
 
     /// Takes base64 encoded bytes from the next 'characters' event.
     pub fn take_bytes_std(&mut self) -> Result<Bytes, XmlReaderErr> {
-        self.take_bytes(base64::STANDARD_NO_PAD)
+        self.take_bytes(base64::engine::general_purpose::STANDARD_NO_PAD)
     }
 
     /// Takes base64 encoded bytes from the next 'characters' event.
     pub fn take_bytes_url_safe_pad(&mut self) -> Result<Bytes, XmlReaderErr> {
-        self.take_bytes(base64::URL_SAFE_NO_PAD)
+        self.take_bytes(base64::engine::general_purpose::URL_SAFE_NO_PAD)
     }
 
-    fn take_bytes(&mut self, config: base64::Config) -> Result<Bytes, XmlReaderErr> {
+    fn take_bytes(&mut self, config: base64::engine::GeneralPurpose) -> Result<Bytes, XmlReaderErr> {
         let chars = self.take_chars()?;
         // strip whitespace and padding (we are liberal in what we accept here)
         // TODO: Avoid allocation, pass in an AsRef<[u8]> that
@@ -236,7 +236,7 @@ impl<R: io::Read> XmlReader<R> {
             .filter(|c| !b" \n\t\r\x0b\x0c=".contains(c))
             .collect();
 
-        let b64 = base64::decode_config(&chars, config)?;
+        let b64 = config.decode(&chars)?;
         Ok(Bytes::from(b64))
     }
 
@@ -282,34 +282,34 @@ impl XmlReader<fs::File> {
 
 #[derive(Debug, Display)]
 pub enum XmlReaderErr {
-    #[display(fmt = "Expected Start of Document")]
+    #[display("Expected Start of Document")]
     ExpectedStartDocument,
 
-    #[display(fmt = "Expected Start Element")]
+    #[display("Expected Start Element")]
     ExpectedStart,
 
-    #[display(fmt = "Expected Start Element with name: {}", _0)]
+    #[display("Expected Start Element with name: {}", _0)]
     ExpectedNamedStart(String),
 
-    #[display(fmt = "Expected Characters Element")]
+    #[display("Expected Characters Element")]
     ExpectedCharacters,
 
-    #[display(fmt = "Expected Close Element with name: {}", _0)]
+    #[display("Expected Close Element with name: {}", _0)]
     ExpectedClose(String),
 
-    #[display(fmt = "Expected End of Document")]
+    #[display("Expected End of Document")]
     ExpectedEnd,
 
-    #[display(fmt = "Error reading file: {}", _0)]
+    #[display("Error reading file: {}", _0)]
     IoError(io::Error),
 
-    #[display(fmt = "Attributes Error: {}", _0)]
+    #[display("Attributes Error: {}", _0)]
     AttributesError(AttributesError),
 
-    #[display(fmt = "XML Reader Error: {}", _0)]
+    #[display("XML Reader Error: {}", _0)]
     ReaderError(reader::Error),
 
-    #[display(fmt = "Base64 decoding issue: {}", _0)]
+    #[display("Base64 decoding issue: {}", _0)]
     Base64Error(DecodeError),
 }
 
@@ -394,13 +394,13 @@ impl Attributes {
 
 #[derive(Debug, Display)]
 pub enum AttributesError {
-    #[display(fmt = "Required attribute missing: {}", _0)]
+    #[display("Required attribute missing: {}", _0)]
     MissingAttribute(String),
 
-    #[display(fmt = "Extra attributes found: {}", _0)]
+    #[display("Extra attributes found: {}", _0)]
     ExtraAttributes(String),
 
-    #[display(fmt = "Wrong hex encoding: {}", _0)]
+    #[display("Wrong hex encoding: {}", _0)]
     HexError(FromHexError),
 }
 
@@ -482,14 +482,14 @@ impl<W: io::Write> XmlWriter<W> {
     /// Converts bytes to base64 encoded Characters as the content, using the
     /// Standard character set, without padding.
     pub fn put_base64_std(&mut self, bytes: &Bytes) -> Result<(), io::Error> {
-        let b64 = base64::encode_config(bytes, base64::STANDARD);
+        let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
         self.put_text(b64.as_ref())
     }
 
     /// Converts bytes to base64 encoded Characters as the content, using the
     /// URL safe character set and padding.
     pub fn put_base64_url_safe(&mut self, bytes: &[u8]) -> Result<(), io::Error> {
-        let b64 = base64::encode_config(bytes, base64::URL_SAFE);
+        let b64 = base64::engine::general_purpose::URL_SAFE.encode(bytes);
         self.put_text(b64.as_ref())
     }
 

@@ -11,14 +11,14 @@ license = "BSD-3-Clause"
 readme = "README.md"
 
 [dependencies]
-base64       = "^0.10"
-bytes        = "^0.4"
-clap         = { version = "^4.5.26", features = ["cargo"] }
-derive_more  = "^0.13"
-hex          = "^0.3"
+base64       = "^0.22"
+bytes        = "^1.10"
+clap         = { version = "^4.5.39", features = ["cargo"] }
+derive_more  = { version = "^2.0", features = ["full"] }
+hex          = "^0.4.3"
 ring         = "^0.17"
-uuid         = { version = "^0.7", features = ["v4"] }
-xml-rs       = "0.8.25"
+uuid         = { version = "^1.17", features = ["v4"] }
+xml-rs       = "0.8.26"
 
 # ------------------------------------------------------------------------------
 # START DEBIAN PACKAGING
