@@ -28,6 +28,13 @@ Publication Server instead so this extra helper tool would not be needed.
 
 ## Changelog
 
+### Release 0.1.0
+
+Updated all dependencies to their most recent version. 
+
+The command line interface was rewritten. Some arguments may no longer work 
+the same way as they did (most notably the shorthands such as -h).
+
 ### Release 0.0.4
 
 Updated _ring_ to 0.17.
@@ -92,24 +99,21 @@ You can ask rrdpit for help.
 
 ```bash
 rrdpit --help
-rrdpit 0.0.2
 Dist to RPKI RRDP
 
-USAGE:
-    rrdpit --https <uri> --rsync <uri> --source <dir> --target <dir> [clean]
+Usage: rrdpit [OPTIONS] --source <dir> --target <dir> --rsync <uri> --https <uri> [clean]
 
-FLAGS:
-        --help       Prints help information
-    -V, --version    Prints version information
+Arguments:
+  [clean]  Clean up target dir (handle with care!)
 
-OPTIONS:
-    -h, --https <uri>     base rrdp uri
-    -r, --rsync <uri>     base rsync uri
-    -s, --source <dir>    source directory
-    -t, --target <dir>    target directory
-
-ARGS:
-    <clean>    Clean up target dir (handle with care!)
+Options:
+      --source <dir>         source directory
+      --target <dir>         target directory
+      --rsync <uri>          base rsync uri
+      --https <uri>          base rrdp uri
+      --max_deltas <number>  Limit the maximum number of deltas kept. Default: 25. Minimum: 1
+  -h, --help                 Print help
+  -V, --version              Print version
 ```
 
 Note that 'clean' is optional. If used rrdpit will try to clean out the target

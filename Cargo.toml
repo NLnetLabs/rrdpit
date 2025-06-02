@@ -1,6 +1,6 @@
 [package]
 name = "rrdpit"
-version = "0.0.4"
+version = "0.1.0"
 authors = ["The NLnet Labs RPKI Team <rpki@nlnetlabs.nl>"]
 description = "RRDP IT: A disk to RPKI Delta Protocol tool."
 repository = "https://github.com/NLnetLabs/rrdpit"
