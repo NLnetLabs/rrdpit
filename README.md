@@ -39,7 +39,7 @@ The `--rsync` and `--https` arguments have been normalised to always end in a
 `/`. 
 
 There are now prebuilt packages for:  
-- Debian (11/12/13)
+- Debian (10/11/12)
 - Ubuntu (20.04/22.04/24.04)
 - RHEL (8/9)
 
