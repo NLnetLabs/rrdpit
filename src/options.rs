@@ -111,19 +111,19 @@ impl Options {
 
 #[derive(Debug, Display)]
 pub enum Error {
-    #[display(fmt = "Not a directory: {}", _0)]
+    #[display("Not a directory: {}", _0)]
     CannotRead(String),
 
-    #[display(fmt = "Not a directory: {}", _0)]
+    #[display("Not a directory: {}", _0)]
     RsyncBaseUri(String),
 
-    #[display(fmt = "Not a directory: {}", _0)]
+    #[display("Not a directory: {}", _0)]
     HttpsBaseUri(String),
 
-    #[display(fmt = "Cannot parse number: {}", _0)]
+    #[display("Cannot parse number: {}", _0)]
     CannotParseNumber(String),
 
-    #[display(fmt = "max_deltas must be at least 1")]
+    #[display("max_deltas must be at least 1")]
     MaxDeltasMustBeOneOrHigher,
 }
 

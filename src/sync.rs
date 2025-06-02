@@ -4,13 +4,14 @@ use std::path::{Path, PathBuf};
 use std::str::from_utf8_unchecked;
 use std::{fmt, fs, io};
 
+use base64::Engine;
 use bytes::Bytes;
 use ring::digest;
 
 //------------ RsyncUri -----------------------------------------------------
 
 #[derive(Clone, Debug, Display, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[display(fmt = "{}", _0)]
+#[display("{}", _0)]
 pub struct RsyncUri(String);
 
 impl RsyncUri {
@@ -36,7 +37,7 @@ impl From<&str> for RsyncUri {
 //------------ HttpsUri -----------------------------------------------------
 
 #[derive(Clone, Debug, Display, Eq, Hash, PartialEq)]
-#[display(fmt = "{}", _0)]
+#[display("{}", _0)]
 pub struct HttpsUri(String);
 
 impl HttpsUri {
@@ -78,12 +79,12 @@ pub struct Base64(Bytes);
 
 impl Base64 {
     pub fn from_content(content: &[u8]) -> Self {
-        let base64 = base64::encode(content);
+        let base64 = base64::engine::general_purpose::STANDARD.encode(content);
         Base64(Bytes::from(base64))
     }
 
     pub fn from_b64_str(s: &str) -> Self {
-        Base64(Bytes::from(s))
+        Base64(Bytes::copy_from_slice(s.as_bytes()))
     }
 }
 
@@ -110,7 +111,8 @@ impl EncodedHash {
     }
 
     pub fn sha256(object: &[u8]) -> Bytes {
-        Bytes::from(digest::digest(&digest::SHA256, object).as_ref())
+        Bytes::copy_from_slice(
+            digest::digest(&digest::SHA256, object).as_ref())
     }
 }
 
@@ -261,22 +263,22 @@ where
 //------------ Error ---------------------------------------------------------
 #[derive(Debug, Display)]
 pub enum Error {
-    #[display(fmt = "Invalid rsync uri")]
+    #[display("Invalid rsync uri")]
     InvalidRsyncUri,
 
-    #[display(fmt = "rsync base uri must start with rsync:// end with slash")]
+    #[display("rsync base uri must start with rsync:// end with slash")]
     InvalidRsyncBase,
 
-    #[display(fmt = "https base uri must start with https:// end with slash")]
+    #[display("https base uri must start with https:// end with slash")]
     InvalidHttpsBase,
 
-    #[display(fmt = "Cannot read: {}", _0)]
+    #[display("Cannot read: {}", _0)]
     CannotRead(String),
 
-    #[display(fmt = "Unsupported characters: {}", _0)]
+    #[display("Unsupported characters: {}", _0)]
     UnsupportedFileName(String),
 
-    #[display(fmt = "File: {} outside of jail: {}", _0, _1)]
+    #[display("File: {} outside of jail: {}", _0, _1)]
     OutsideJail(String, String),
 }
 
@@ -291,7 +293,7 @@ impl std::error::Error for Error {}
 
 impl From<Error> for io::Error {
     fn from(e: Error) -> Self {
-        io::Error::new(io::ErrorKind::Other, e)
+        io::Error::other(e)
     }
 }
 

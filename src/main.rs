@@ -66,7 +66,7 @@ fn sync(options: Options) -> Result<(), Error> {
 //------------ Error ---------------------------------------------------------
 #[derive(Debug, Display)]
 pub enum Error {
-    #[display(fmt = "{}", _0)]
+    #[display("{}", _0)]
     Custom(String),
 }
 

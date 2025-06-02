@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::{fmt, io};
 
+use base64::Engine;
 use bytes::Bytes;
 use uuid::Uuid;
 
@@ -587,7 +588,7 @@ impl Snapshot {
                         a.exhausted()?;
 
                         let base64 = r.take_chars()?;
-                        let content = base64::decode(&base64)?;
+                        let content = base64::engine::general_purpose::STANDARD.decode(&base64)?;
 
                         Ok(Some(CurrentFile::new(uri, &content)))
                     }
@@ -732,13 +733,13 @@ impl Delta {
 //------------ Error ---------------------------------------------------------
 #[derive(Debug, Display)]
 pub enum Error {
-    #[display(fmt = "Invalid XML: {}", _0)]
+    #[display("Invalid XML: {}", _0)]
     InvalidXml(String),
 
-    #[display(fmt = "Invalid delta for current session and serial")]
+    #[display("Invalid delta for current session and serial")]
     InvalidDelta,
 
-    #[display(fmt = "No valid repo state found on disk")]
+    #[display("No valid repo state found on disk")]
     InvalidRepoState,
 }
 
@@ -772,8 +773,8 @@ impl From<ParseIntError> for Error {
     }
 }
 
-impl From<uuid::parser::ParseError> for Error {
-    fn from(e: uuid::parser::ParseError) -> Self {
+impl From<uuid::Error> for Error {
+    fn from(e: uuid::Error) -> Self {
         Error::invalid_xml(e)
     }
 }
