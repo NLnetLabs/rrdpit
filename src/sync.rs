@@ -84,8 +84,7 @@ impl Base64 {
     }
 
     pub fn from_b64_str(s: &str) -> Self {
-        let s = s.to_owned();
-        Base64(Bytes::from(s))
+        Base64(Bytes::copy_from_slice(s.as_bytes()))
     }
 }
 
@@ -112,8 +111,8 @@ impl EncodedHash {
     }
 
     pub fn sha256(object: &[u8]) -> Bytes {
-        let x = digest::digest(&digest::SHA256, object);
-        Bytes::from(x.as_ref().to_owned())
+        Bytes::copy_from_slice(
+            digest::digest(&digest::SHA256, object).as_ref())
     }
 }
 
