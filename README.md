@@ -102,10 +102,20 @@ curl -fsSL https://packages.nlnetlabs.nl/aptkey.asc | sudo gpg --dearmor -o /usr
 
 Now, use the following command to set up the *main* repository:
 
+##### Debian
+
 ``` bash
 echo \
 "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nlnetlabs-archive-keyring.gpg] https://packages.nlnetlabs.nl/linux/debian \
 $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/nlnetlabs.list /dev/null
+```
+
+##### Ubuntu
+
+```bash
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nlnetlabs-archive-keyring.gpg] https://packages.nlnetlabs.nl/linux/ubuntu \
+$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/nlnetlabs.list > /dev/null
 ```
 
 Update the `apt` package index once more:
