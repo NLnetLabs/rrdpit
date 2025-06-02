@@ -23,10 +23,13 @@ impl Options {
         let source = PathBuf::from(source);
         let target = PathBuf::from(target);
 
+        let rsync = rsync.trim_end_matches("/").to_owned() + "/";
+        let https = https.trim_end_matches("/").to_owned() + "/";
+
         let rsync =
-            RsyncUri::base_uri(rsync).map_err(|_| Error::RsyncBaseUri(rsync.to_string()))?;
+            RsyncUri::base_uri(&rsync).map_err(|_| Error::RsyncBaseUri(rsync.to_string()))?;
         let https =
-            HttpsUri::base_uri(https).map_err(|_| Error::HttpsBaseUri(https.to_string()))?;
+            HttpsUri::base_uri(&https).map_err(|_| Error::HttpsBaseUri(https.to_string()))?;
 
         let max_deltas = max_deltas
             .parse::<usize>()
