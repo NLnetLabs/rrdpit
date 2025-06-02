@@ -35,6 +35,14 @@ Updated all dependencies to their most recent version.
 The command line interface was rewritten. Some arguments may no longer work 
 the same way as they did (most notably the shorthands such as -h).
 
+The `--rsync` and `--https` arguments have been normalised to always end in a
+`/`. 
+
+There are now prebuilt packages for:  
+- Debian (11/12/13)
+- Ubuntu (20.04/22.04/24.04)
+- RHEL (8/9)
+
 ### Release 0.0.4
 
 Updated _ring_ to 0.17.
@@ -65,6 +73,80 @@ Initial release.
 
 
 ## Installing rrdpit
+
+### NLnet Labs repository
+
+#### Debian / Ubuntu
+
+First update the `apt` package index:
+
+``` bash
+sudo apt update
+```
+
+Then install packages to allow `apt` to use a repository over HTTPS:
+
+``` bash
+sudo apt install \
+  ca-certificates \
+  curl \
+  gnupg \
+  lsb-release
+```
+
+Add the GPG key from NLnet Labs:
+
+``` bash
+curl -fsSL https://packages.nlnetlabs.nl/aptkey.asc | sudo gpg --dearmor -o /usr/share/keyrings/nlnetlabs-archive-keyring.gpg
+```
+
+Now, use the following command to set up the *main* repository:
+
+``` bash
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nlnetlabs-archive-keyring.gpg] https://packages.nlnetlabs.nl/linux/debian \
+$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/nlnetlabs.list /dev/null
+```
+
+Update the `apt` package index once more:
+
+``` bash
+sudo apt update
+```
+
+You can now install rrdpit with:
+
+``` bash
+sudo apt install rrdpit
+```
+
+
+#### RHEL / Rocky Linux
+
+First create a file named `/etc/yum.repos.d/nlnetlabs.repo`, enter this 
+configuration and save it:
+
+``` text
+[nlnetlabs]
+name=NLnet Labs
+baseurl=https://packages.nlnetlabs.nl/linux/centos/$releasever/main/$basearch
+enabled=1
+```
+
+Add the GPG key from NLnet Labs:
+
+``` bash
+sudo rpm --import https://packages.nlnetlabs.nl/aptkey.asc
+```
+
+You can now install Routinator with:
+
+``` bash
+sudo yum install -y routinator
+```
+
+
+### Compile it yourself
 
 Assuming you have rsync and the C toolchain but not yet Rust, here’s how
 you get rust installed.

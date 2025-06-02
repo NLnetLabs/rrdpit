@@ -62,3 +62,15 @@ assets = [["target/release/rrdpit", "/usr/bin/rrdpit", "755"]]
 # END DEBIAN PACKAGING
 # ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
+# START RPM PACKAGING
+#
+# Configurations for the cargo-generate-rpm cargo plugin which builds RPM
+# packages in target/generate-rpm/ when invoked with: cargo generate-rpm
+#
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/rrdpit", dest = "/usr/bin/rrdpit", mode = "755" },
+]
+# END RPM PACKAGING
+# ------------------------------------------------------------------------------
