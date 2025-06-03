@@ -149,10 +149,10 @@ Add the GPG key from NLnet Labs:
 sudo rpm --import https://packages.nlnetlabs.nl/aptkey.asc
 ```
 
-You can now install Routinator with:
+You can now install rrdpit with:
 
 ``` bash
-sudo yum install -y routinator
+sudo yum install -y rrdpit
 ```
 
 
