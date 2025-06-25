@@ -91,8 +91,6 @@ mod tests {
         let source = tempdir().unwrap();
         let target = tempdir().unwrap();
 
-        dbg!(target.path().as_os_str());
-
         fs::create_dir(target.path().join(
             Uuid::new_v4().to_string()
         )).unwrap();
