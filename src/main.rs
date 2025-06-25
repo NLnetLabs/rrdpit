@@ -75,3 +75,45 @@ impl Error {
         Error::Custom(e.to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{fs::{self, File}, io::Write};
+
+    use rrdpit::options::Options;
+    use tempfile::tempdir;
+    use uuid::Uuid;
+
+    use crate::sync;
+
+    #[test]
+    fn test_max_deltas() {
+        let source = tempdir().unwrap();
+        let target = tempdir().unwrap();
+
+        dbg!(target.path().as_os_str());
+
+        fs::create_dir(target.path().join(
+            Uuid::new_v4().to_string()
+        )).unwrap();
+
+        for i in 1..25 {
+            let mut file = File::create(
+                source.path().join(format!("test{}", i))
+            ).unwrap();
+            file.write(b"test").unwrap();
+            let options = Options {
+                source: source.path().to_path_buf(),
+                target: target.path().to_path_buf(),
+                rsync: "rsync://example.org/rrdpit".into(),
+                https: "https://example.org/rrdpit/".into(),
+                clean: i > 10,
+                max_deltas: 5,
+            };
+            sync(options).unwrap();
+        }
+
+        let paths = fs::read_dir(&target).unwrap();
+        assert_eq!(2, paths.count());
+    }
+}

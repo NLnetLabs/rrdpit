@@ -253,7 +253,8 @@ impl RepoState {
 
         if clean {
             // Clean up disk: unused session uuid dirs and unused delta dirs
-            sync::retain_disk(&self.base_dir, |name| name == session.to_string())?;
+            sync::retain_disk(&self.base_dir, 
+                |name| name.contains(&session.to_string()))?;
 
             if let Some(last_serial) = last_serial {
                 let session_dir = self.base_dir.join(format!("{}/", self.session));
