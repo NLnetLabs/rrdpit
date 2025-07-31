@@ -847,16 +847,16 @@ mod tests {
         assert_eq!(1, publishes.len());
         assert_eq!(
             &RsyncUri::from(RSYNC_FILE4),
-            publishes.get(0).unwrap().uri()
+            publishes.first().unwrap().uri()
         );
 
         assert_eq!(1, updates.len());
-        assert_eq!(&RsyncUri::from(RSYNC_FILE1), updates.get(0).unwrap().uri());
+        assert_eq!(&RsyncUri::from(RSYNC_FILE1), updates.first().unwrap().uri());
 
         assert_eq!(1, withdraws.len());
         assert_eq!(
             &RsyncUri::from(RSYNC_FILE3),
-            withdraws.get(0).unwrap().uri()
+            withdraws.first().unwrap().uri()
         );
     }
 
