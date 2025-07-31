@@ -17,12 +17,12 @@ fn main() {
         Ok(options) => match sync(options) {
             Ok(()) => {}
             Err(e) => {
-                eprintln!("{}", e);
+                eprintln!("{e}");
                 ::std::process::exit(1);
             }
         },
         Err(e) => {
-            eprintln!("{}", e);
+            eprintln!("{e}");
             ::std::process::exit(1);
         }
     }

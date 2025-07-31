@@ -406,7 +406,7 @@ pub enum AttributesError {
 
 impl AttributesError {
     fn extras(atts: &[OwnedAttribute]) -> Self {
-        let atts: Vec<String> = atts.iter().map(|a| format!("{}", a)).collect();
+        let atts: Vec<String> = atts.iter().map(|a| format!("{a}")).collect();
         let atts = atts.join(", ");
         AttributesError::ExtraAttributes(atts)
     }
@@ -441,7 +441,7 @@ impl<W: io::Write> XmlWriter<W> {
                         // not closing tags, starting a doc twice etc. But
                         // the XmlWriter lib already ensures that these things
                         // do not happen. They are not dependent on input.
-                        panic!("XmlWriter library error: {:?}", e)
+                        panic!("XmlWriter library error: {e:?}")
                     }
                 }
             }
