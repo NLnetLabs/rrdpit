@@ -28,6 +28,12 @@ Publication Server instead so this extra helper tool would not be needed.
 
 ## Changelog
 
+### Release 0.1.1
+
+Added support for Debian Trixie. This also removes support for Debian Buster.
+
+Fixed a bug where clean would remove all folders.
+
 ### Release 0.1.0
 
 Updated all dependencies to their most recent version. 
