@@ -34,6 +34,11 @@ Updated all dependencies to their most recent version.
 
 This release no longer supports Ubuntu 20.04 and Debian 10.
 
+There are now prebuilt packages for:  
+- Debian (12/13)
+- Ubuntu (22.04/24.04)
+- RHEL (8/9/10)
+
 ### Release 0.1.1
 
 Added support for Debian Trixie. This also removes support for Debian Buster.
