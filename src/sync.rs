@@ -166,8 +166,10 @@ pub fn read(path: &PathBuf) -> Result<Bytes, io::Error> {
 }
 
 fn create_file_with_path(path: &Path) -> Result<File, io::Error> {
-    if !path.exists() && let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)?;
+    if !path.exists() {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
     }
     File::create(path)
 }
