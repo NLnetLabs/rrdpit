@@ -3,11 +3,9 @@ on:
   push:
     branches:
       - main
-      - master
   pull_request:
     branches:
       - main
-      - master
 jobs:
   test:
     name: test
@@ -18,7 +16,7 @@ jobs:
         rust: [1.84.0, stable]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Install Rust
       uses: hecrj/setup-rust-action@v2
       with:

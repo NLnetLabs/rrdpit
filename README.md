@@ -28,6 +28,12 @@ Publication Server instead so this extra helper tool would not be needed.
 
 ## Changelog
 
+### Release 0.1.2
+
+Updated all dependencies to their most recent version. 
+
+This release no longer supports Ubuntu 20.04 and Debian 10.
+
 ### Release 0.1.1
 
 Added support for Debian Trixie. This also removes support for Debian Buster.

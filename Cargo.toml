@@ -1,6 +1,6 @@
 [package]
 name = "rrdpit"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["The NLnet Labs RPKI Team <rpki-team@nlnetlabs.nl>"]
 description = "RRDP IT: A disk to RPKI Delta Protocol tool."
 repository = "https://github.com/NLnetLabs/rrdpit"
@@ -12,16 +12,16 @@ readme = "README.md"
 
 [dependencies]
 base64       = "^0.22"
-bytes        = "^1.10"
-clap         = { version = "^4.5.39", features = ["cargo"] }
-derive_more  = { version = "^2.0", features = ["full"] }
+bytes        = "^1.11"
+clap         = { version = "^4.5.55", features = ["cargo"] }
+derive_more  = { version = "^2.1", features = ["full"] }
 hex          = "^0.4.3"
 ring         = "^0.17"
-uuid         = { version = "^1.17", features = ["v4"] }
-xml-rs       = "0.8.26"
+uuid         = { version = "^1.20", features = ["v4"] }
+xml-rs       = "1.0.0"
 
 [dev-dependencies]
-tempfile     = "^3.20"
+tempfile     = "^3.24"
 
 # ------------------------------------------------------------------------------
 # START DEBIAN PACKAGING
@@ -50,17 +50,13 @@ copyright = "Copyright (c) 2025, NLnet Labs. All rights reserved."
 assets = [["target/release/rrdpit", "/usr/bin/rrdpit", "755"]]
 
 # List target variants
-[package.metadata.deb.variants.ubuntu-focal]
-
 [package.metadata.deb.variants.ubuntu-jammy]
 
 [package.metadata.deb.variants.ubuntu-noble]
 
-[package.metadata.deb.variants.debian-buster]
-
-[package.metadata.deb.variants.debian-bullseye]
-
 [package.metadata.deb.variants.debian-bookworm]
+
+[package.metadata.deb.variants.debian-trixie]
 
 # END DEBIAN PACKAGING
 # ------------------------------------------------------------------------------
